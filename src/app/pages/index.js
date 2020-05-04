@@ -1,25 +1,30 @@
 import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { API_SERVER_ROUTE } from '../static-global-variables.json'
 
 export default function Home() {
   const [ slug, setSlug ] = useState()
   const [ password, setPassword ] = useState()
   const [ user, setUser ] = useState()
 
-  useEffect(async ()=>{
-    const res = await fetch('/api/user/session')
+  const checkSession = async ()=>{
+    const res = await fetch( API_SERVER_ROUTE + '/api/user/session')
     const sessionPrevia = await res.json()
     if (sessionPrevia){
       setUser(sessionPrevia)
       console.log("sesión previa encontrada")
       console.log(sessionPrevia)
     }
-  },{})
+  }
+
+  useEffect( ()=>{
+    checkSession()
+  },[])
 
   const handleSubmit = async e => {
     e.preventDefault()
-    const auth = await fetch('/api/user/auth', {
+    const auth = await fetch( API_SERVER_ROUTE + '/api/user/auth', {
       method: 'POST',
       body: JSON.stringify({
         slug, 
@@ -70,8 +75,8 @@ export default function Home() {
             <p>Bienvenido { user.name }</p>
         }
 
-        <Link href="/twit" as="/t"><a>Twit</a></Link>
-        <Link href="/user" as="/u"><a>User</a></Link>
+        <Link href="/twit"  ><a>Twit trailing</a></Link>
+        <Link href="/user"><a>User</a></Link>
 
       </main>
 

@@ -1,10 +1,11 @@
 module.exports = {
-    exportTrailingSlash: true,
-    exportPathMap: async function() {
+    exportTrailingSlash: false,
+    exportPathMap: async function(defaultPathMap,
+        { dev, dir, outDir, distDir, buildId }) {
         return {
             '/': { page: '/' },
             '/user': { page: '/user' },
-            '/t': { page: '/twit' }
+            '/ttwit': { page: '/twit' }
         }
     }
 }

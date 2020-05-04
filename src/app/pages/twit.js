@@ -1,7 +1,9 @@
 import React from 'react'
 
-export default () => {
+ const Twit = () => {
     return (
         <h1>Twit</h1>
     )
 }
+
+export default Twit

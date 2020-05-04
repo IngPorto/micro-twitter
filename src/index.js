@@ -4,11 +4,12 @@ const path = require('path')
 const morgan = require('morgan')
 const { mongoose } = require('./database')
 const session = require('express-session')
+const cors = require('cors')
 
 // --------------------
 // ::: Configuración :::
 // --------------------
-server.set('port', process.env.PORT || 3000)
+server.set('port', process.env.PORT || 3100)
 
 // --------------------
 // ::: Middleware ::: 
@@ -21,6 +22,7 @@ server.use(session({
     resave: true,
     saveUninitialized: true
 }))
+server.use(cors())
 
 // --------------------
 // ::: Routes :::
