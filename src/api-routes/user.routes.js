@@ -4,6 +4,39 @@ const { check, validationResult } = require('express-validator')
 const ObjectId = require('mongoose').Types.ObjectId;
 const UserModel = require('../models/user')
 
+// -- Custom User requests
+
+router.post('/auth', async (req, res)=>{
+    const { slug, password } = req.body
+    console.log(req.body)
+    const user = await UserModel.findOne({"slug": slug, "password": password })
+    if ( user ){
+        req.session.user = user
+    }
+    res.json(user)
+})
+
+router.get('/session', async (req, res)=>{
+    if ( req.session.user ){
+        res.json(req.session.user)
+    }else {
+        res.json(null)
+    }
+})
+
+router.get('/logout', async (req, res)=>{
+    if ( req.session.user ){
+        await req.session.destroy()
+    }
+    res.json({status: 'session closed'})
+})
+
+// does slug exist? return an array fill or empty
+router.get('/slug/:slug', async (req, res)=>{
+    const users = await UserModel.find({"slug": req.params.slug})
+    res.json(users)
+})
+
 // -- User basic requests
 
 router.get('/', async (req, res) => {
@@ -80,29 +113,7 @@ router.delete('/:id', async (req, res) => {
     res.json( {status: 'user deleted'} )
 })
 
-// -- Custom User requests
 
-router.post('/auth', async (req, res)=>{
-    const { slug, password } = req.body
-    const user = await UserModel.findOne({"slug": slug, "password": password })
-    if ( user ){
-        req.session.user = user
-    }
-    res.json(user)
-})
-
-router.get('/logout', async (req, res)=>{
-    if ( req.session.user ){
-        await req.session.destroy()
-    }
-    res.json({status: 'session closed'})
-})
-
-// does slug exist? return an array fill or empty
-router.get('/slug/:slug', async (req, res)=>{
-    const users = await UserModel.find({"slug": req.params.slug})
-    res.json(users)
-})
 
 
 module.exports = router

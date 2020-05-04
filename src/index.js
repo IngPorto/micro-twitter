@@ -31,7 +31,7 @@ server.use('/api/user', require('./api-routes/user.routes') )
 // --------------------
 // ::: Static files :::
 // --------------------
-server.use(express.static(path.join(__dirname,'public')))
+server.use(express.static(path.join(__dirname,'app/build')))
 
 // --------------------
 // ::: Starting server :::
