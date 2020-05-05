@@ -2,15 +2,40 @@ const express = require('express')
 const router = express.Router()
 const TwitModel = require('../models/twit')
 const ObjectId = require('mongoose').Types.ObjectId
+const cors = require('cors')
+
+// --------------------------
+// ::: Configuración CORS ::: 
+// --------------------------
+let corsOptions = {
+    "origin": ["http://localhost:3000","http://localhost:3000/*"],
+    "allowedHeaders": "Content-Type,Authorization",
+    "preflightContinue": true,
+    "credentials": true,
+}
+// Enabling CORS Pre-Flight. Necesario cuando el cliente envía datos y el servidor mantiene la sesión por cookies
+//router.options('/:skip/:limit', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/', cors(corsOptions))      // Creación de tarea
+// ---END-Configuración-CORS---
+
+
+
+// -- Custom Twit request
+router.get('/:skip/:limit', cors(corsOptions), async (req, res) =>{
+    const { skip = 0, limit = 10 } = req.params
+    const twits = await TwitModel.find().skip( parseInt(skip)).limit( parseInt(limit)).sort({creation_time: -1})
+    res.json(twits)
+})
+
 
 // -- Basic Twits requests
-
-router.get('/', async (req, res) =>{
+router.get('/', cors(corsOptions), async (req, res) =>{
     const twits = await TwitModel.find()
     res.json(twits)
 })
 
-router.get('/:id', async (req, res) =>{
+router.get('/:id', cors(corsOptions), async (req, res) =>{
     try{
         ObjectId(req.params.id)
     } catch (e){
@@ -21,7 +46,7 @@ router.get('/:id', async (req, res) =>{
     res.json(twits)
 })
 
-router.post('/', async (req, res) =>{
+router.post('/', cors(corsOptions), async (req, res) =>{
     const {
         message,
         owner,
@@ -31,8 +56,8 @@ router.post('/', async (req, res) =>{
     
     const newTwit = new TwitModel({
         message,
-        image,
         owner,
+        image,
         parent,
         creation_time: Date.now(),
     })
@@ -45,7 +70,7 @@ router.post('/', async (req, res) =>{
     res.json(newTwit)
 })
 
-router.put('/:id', async (req, res) =>{
+router.put('/:id', cors(corsOptions), async (req, res) =>{
     let updTwit = {}
     try {
         updTwit = await TwitModel.findByIdAndUpdate(req.params.id, req.body)
@@ -56,7 +81,7 @@ router.put('/:id', async (req, res) =>{
     res.json (updTwit)
 })
 
-router.delete('/:id', async (req, res) =>{
+router.delete('/:id', cors(corsOptions), async (req, res) =>{
     const newTwitData = { deleted: true }
     try {
         const twit = await TwitModel.findByIdAndUpdate(req.params.id, newTwitData)
@@ -68,11 +93,6 @@ router.delete('/:id', async (req, res) =>{
     res.json( {status: 'twit deleted'} )
 })
 
-// -- Custom Twit request
-router.get('/:skip/:limit', async (req, res) =>{
-    const { skip = 0, limit = 10 } = req.params
-    const twits = await TwitModel.find().skip( parseInt(skip)).limit( parseInt(limit)).sort({creation_time: -1})
-    res.json(twits)
-})
+
 
 module.exports = router

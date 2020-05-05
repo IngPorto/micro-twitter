@@ -5,7 +5,7 @@ module.exports = {
         return {
             '/': { page: '/' },
             '/user': { page: '/user' },
-            '/ttwit': { page: '/twit' }
+            '/twit': { page: '/twit' }
         }
     }
 }

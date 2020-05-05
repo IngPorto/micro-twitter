@@ -2,14 +2,13 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { API_SERVER_ROUTE } from '../static-global-variables.json'
+import Landing from '../components/Landing'
 
 export default function Home() {
-  const [ slug, setSlug ] = useState()
-  const [ password, setPassword ] = useState()
   const [ user, setUser ] = useState()
 
   const checkSession = async ()=>{
-    const res = await fetch( API_SERVER_ROUTE + '/api/user/session')
+    const res = await fetch( API_SERVER_ROUTE + '/api/user/session',{credentials: 'include'})
     const sessionPrevia = await res.json()
     if (sessionPrevia){
       setUser(sessionPrevia)
@@ -22,32 +21,25 @@ export default function Home() {
     checkSession()
   },[])
 
-  const handleSubmit = async e => {
-    e.preventDefault()
-    const auth = await fetch( API_SERVER_ROUTE + '/api/user/auth', {
+  const test = async ()=>{
+    const res = await fetch( API_SERVER_ROUTE + '/api/twit/',
+    {
       method: 'POST',
       body: JSON.stringify({
-        slug, 
-        password
+        "message": 'Testing 2',
+        "owner": '5eaf47130b29bb337c8bc41b'
       }),
       headers: {
-        "Content-Type": "application/json"
+        'Content-Type': 'application/json'
       }
     })
-    const response = await auth.json()
-    if ( response ){
-      setUser(response)
+    const twits = await res.json()
+    if (twits){
+      console.log(".........")
+      console.log(twits)
     }
-    console.log(response)
   }
-
-  const handleChange = e => {
-    switch (e.target.name) {
-      case 'slug': setSlug(e.target.value); break;
-      case 'password': setPassword(e.target.value); break;
-    }
-    console.log(e.target.value)
-  }
+  
 
   return (
     <div className="container">
@@ -62,21 +54,14 @@ export default function Home() {
       <main>
         { 
           !user ? 
-            <div>
-              <p>Micro Twitter</p>
-              <p>Inicia</p>
-              <form onSubmit={handleSubmit}>
-                <input type="text" placeholder="nickname" name="slug" onChange={handleChange} />
-                <input type="password" placeholder="contraseña" name="password" onChange={handleChange} />
-                <button type="submit">Entrar</button>
-              </form>
-            </div>
+            <Landing user={user} setUser={setUser}/>
             :
             <p>Bienvenido { user.name }</p>
         }
 
         <Link href="/twit"  ><a>Twit trailing</a></Link>
         <Link href="/user"><a>User</a></Link>
+        <button onClick={test}>Twit</button>
 
       </main>
 

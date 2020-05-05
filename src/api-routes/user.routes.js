@@ -3,20 +3,44 @@ const router = express.Router()
 const { check, validationResult } = require('express-validator')
 const ObjectId = require('mongoose').Types.ObjectId;
 const UserModel = require('../models/user')
+const cors = require('cors')
+
+// --------------------------
+// ::: Configuración CORS ::: 
+// --------------------------
+let corsOptions = {
+    "origin": ["http://localhost:3000","http://localhost:3000/*"],
+    "allowedHeaders": "Content-Type,Authorization",
+    "preflightContinue": true,
+    "credentials": true,
+}
+// Enabling CORS Pre-Flight. Necesario cuando el cliente envía datos y el servidor mantiene la sesión por cookies
+router.options('/auth', cors(corsOptions))  // Credenciales de autenticación de usuario
+router.options('/', cors(corsOptions))      // Creación de usuario
+router.options('/:id', cors(corsOptions))   // Actualización de datos de usuario y Eliminación
+// ---END-Configuración-CORS---
+
+
 
 // -- Custom User requests
-
-router.post('/auth', async (req, res)=>{
+router.post('/auth', cors(corsOptions), async (req, res)=>{
+    res.setHeader('Content-Type', 'application/json');
     const { slug, password } = req.body
     console.log(req.body)
     const user = await UserModel.findOne({"slug": slug, "password": password })
+    console.log("::::: USER ::::::")
+    console.log(user)
     if ( user ){
         req.session.user = user
+        //await req.session.save()
+        console.log("::::: SESION ::::::")
+        console.log(req.session)
     }
     res.json(user)
 })
 
-router.get('/session', async (req, res)=>{
+router.get('/session', cors(corsOptions), async (req, res)=>{
+    console.log(req.session)
     if ( req.session.user ){
         res.json(req.session.user)
     }else {
@@ -24,7 +48,7 @@ router.get('/session', async (req, res)=>{
     }
 })
 
-router.get('/logout', async (req, res)=>{
+router.get('/logout', cors(corsOptions), async (req, res)=>{
     if ( req.session.user ){
         await req.session.destroy()
     }
@@ -32,19 +56,19 @@ router.get('/logout', async (req, res)=>{
 })
 
 // does slug exist? return an array fill or empty
-router.get('/slug/:slug', async (req, res)=>{
+router.get('/slug/:slug', cors(corsOptions), async (req, res)=>{
     const users = await UserModel.find({"slug": req.params.slug})
     res.json(users)
 })
 
-// -- User basic requests
 
-router.get('/', async (req, res) => {
+// -- User basic requests
+router.get('/', cors(corsOptions), async (req, res) => {
     const user = await UserModel.find()
     res.json( user )
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', cors(corsOptions), async (req, res) => {
     try {
         ObjectId(req.params.id)
     }catch (e){
@@ -56,6 +80,7 @@ router.get('/:id', async (req, res) => {
 })
 
 router.post('/', [
+    cors(corsOptions),
     check('name').not().isEmpty(),
     check('slug').not().isEmpty(),
     check('password').not().isEmpty()
@@ -90,7 +115,7 @@ router.post('/', [
     res.json( newUser )
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', cors(corsOptions), async (req, res) => {
     let updUser = {}
     try {
         updUser = await UserModel.findByIdAndUpdate( req.params.id, req.body )
@@ -101,7 +126,7 @@ router.put('/:id', async (req, res) => {
     res.json( updUser )
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', cors(corsOptions), async (req, res) => {
     const newUserData = { deleted: true }
     try {
         const user = await UserModel.findByIdAndUpdate( req.params.id, newUserData )

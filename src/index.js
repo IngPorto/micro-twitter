@@ -5,6 +5,8 @@ const morgan = require('morgan')
 const { mongoose } = require('./database')
 const session = require('express-session')
 const cors = require('cors')
+const MongoStore = require('connect-mongo')(session)
+const mongoose2 = require('mongoose')
 
 // --------------------
 // ::: Configuración :::
@@ -16,13 +18,27 @@ server.set('port', process.env.PORT || 3100)
 // --------------------
 server.use(morgan('dev'))
 server.use(express.json())
-server.use(express.urlencoded())
+server.use(express.urlencoded({extended:true}))
+server.set('trust proxy', 1)
+
+//server.use(cors())
+
+// Conexión de mongo solo para adminstrar las sesiones
+const connection = mongoose2.createConnection('mongodb://localhost/micro-twitter', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+const sessionStorage = new MongoStore({
+    mongooseConnection: connection,
+    collection: 'sessions'
+})
 server.use(session({
     secret: 'innovacion-salt',
-    resave: true,
-    saveUninitialized: true
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStorage,
+    cookie: { 
+        maxAge: 1000 * 60 * 60 * 24, // 1 day 
+        secure: false // only save on https false
+    } 
 }))
-server.use(cors())
 
 // --------------------
 // ::: Routes :::
