@@ -51,8 +51,10 @@ router.get('/session', cors(corsOptions), async (req, res)=>{
 router.get('/logout', cors(corsOptions), async (req, res)=>{
     if ( req.session.user ){
         await req.session.destroy()
+        res.json({status: 'session closed'})
+        return;
     }
-    res.json({status: 'session closed'})
+    res.json( {status: 'request failed', message: 'fallo en -Logout- del usuario: '} )
 })
 
 // does slug exist? return an array fill or empty

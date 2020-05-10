@@ -24,14 +24,43 @@ router.options('/', cors(corsOptions))      // Creación de tarea
 // -- Custom Twit request
 router.get('/:skip/:limit', cors(corsOptions), async (req, res) =>{
     const { skip = 0, limit = 10 } = req.params
-    const twits = await TwitModel.find().skip( parseInt(skip)).limit( parseInt(limit)).sort({creation_time: -1})
+    //const twits = await TwitModel.find().skip( parseInt(skip)).limit( parseInt(limit)).sort({creation_time: -1})
+    const twits = await TwitModel.aggregate([
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        },
+        {
+            $sort: {creation_time: -1}
+        },
+        {
+            $skip: parseInt(skip),
+        },    
+        {
+            $limit: parseInt(limit)
+        }
+    ]) // ojo, el orden de los consultas importan, afectan el resultado
     res.json(twits)
 })
 
 
+
 // -- Basic Twits requests
 router.get('/', cors(corsOptions), async (req, res) =>{
-    const twits = await TwitModel.find()
+    const twits = await TwitModel.aggregate([
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        }
+    ])
     res.json(twits)
 })
 
