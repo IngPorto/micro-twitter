@@ -28,19 +28,19 @@ router.post('/auth', cors(corsOptions), async (req, res)=>{
     const { slug, password } = req.body
     console.log(req.body)
     const user = await UserModel.findOne({"slug": slug, "password": password })
-    console.log("::::: USER ::::::")
-    console.log(user)
+    
+    //console.log("::::: USER ::::::")
+    //console.log(user)
     if ( user ){
         req.session.user = user
         //await req.session.save()
-        console.log("::::: SESION ::::::")
-        console.log(req.session)
+        showRequestData(req)
     }
     res.json(user)
 })
 
 router.get('/session', cors(corsOptions), async (req, res)=>{
-    console.log(req.session)
+    showRequestData(req)
     if ( req.session.user ){
         res.json(req.session.user)
     }else {
@@ -138,7 +138,14 @@ router.delete('/:id', cors(corsOptions), async (req, res) => {
     res.json( {status: 'user deleted'} )
 })
 
-
+const showRequestData = req => {
+    console.log(":::::::::::::::::::::::::::::: NETWORK ::::::")
+    console.log( req.originalUrl )
+    console.log( req.headers )
+    console.log( req.rawHeaders )
+    console.log(":::::::::::::::::::::::::::::: SESION ::::::")
+    console.log(req.session)
+} 
 
 
 module.exports = router

@@ -73,6 +73,8 @@ router.post('/', cors(corsOptions), async (req, res) =>{
 router.put('/:id', cors(corsOptions), async (req, res) =>{
     let updTwit = {}
     try {
+        const twit = await TwitModel.findById(req.params.id)
+        req.body.comments = [ ...twit.comments, ...req.body.comments ]
         updTwit = await TwitModel.findByIdAndUpdate(req.params.id, req.body)
     } catch (e) {
         res.json({status: 'request fail', message: 'Fail updating the Twit: '+e})
