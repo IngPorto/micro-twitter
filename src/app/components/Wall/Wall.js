@@ -79,6 +79,7 @@ export default function Wall (props) {
     const handleGetOwnerTwitPhotoSrc = () => {
         return '/img/user_default.png'
     }
+    // Inutil por ahora
     const getOneUser = useCallback ( node => {
         if ( node && node.innerText[0] !== '@' ){
             axios({
@@ -133,8 +134,49 @@ export default function Wall (props) {
         axios({
             url: API_SERVER_ROUTE + `/api/user/logout`,
             method: 'GET',
+            withCredentials: 'include'
         }).then(res=>{
             props.setUser(null)
+        })
+    }
+
+    const handleLike = twitId => {
+        document.getElementById(`like-icon-${twitId}`).classList.toggle('text-danger')
+        if ( document.getElementById(`like-icon-${twitId}`).classList.contains('text-danger') ){
+            document.getElementById(`like-value-${twitId}`).innerText = parseInt(document.getElementById(`like-value-${twitId}`).innerText) + 1
+        }else {
+            document.getElementById(`like-value-${twitId}`).innerText = parseInt(document.getElementById(`like-value-${twitId}`).innerText) - 1
+        }
+        axios({
+            url: API_SERVER_ROUTE + `/api/twit/like/${twitId}`,
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+                like: props.user._id
+            })
+        })
+    }
+
+    const handleShare = twitId => {
+        document.getElementById(`share-icon-${twitId}`).classList.toggle('text-success')
+        if ( document.getElementById(`share-icon-${twitId}`).classList.contains('text-success') ){
+            document.getElementById(`share-value-${twitId}`).innerText = parseInt(document.getElementById(`share-value-${twitId}`).innerText) + 1
+        }else {
+            document.getElementById(`share-value-${twitId}`).innerText = parseInt(document.getElementById(`share-value-${twitId}`).innerText) - 1
+        }
+        axios({
+            url: API_SERVER_ROUTE + `/api/twit/share/${twitId}`,
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
+                share: props.user._id
+            })
         })
     }
 
@@ -179,8 +221,14 @@ export default function Wall (props) {
                                 <div className="twit-image">
                                 </div>
                                 <div className="twit-foot">
-                                    <p><i className="fa fa-heart"></i> {twit.likes != '' ? twit.likes : 0}</p>
-                                    <p><i className="fa fa-retweet"></i> {twit.shares != '' ? twit.shares : 0}</p>
+                                    <p onClick={() => handleLike(twit._id)} >
+                                        <i id={`like-icon-${twit._id}`} className={`fa fa-heart ${twit.likes.indexOf( props.user._id ) > (-1) && 'text-danger'}`}></i> 
+                                        <span id={`like-value-${twit._id}`} >{twit.likes != '' ? twit.likes.length : 0}</span>
+                                    </p>
+                                    <p onClick={() => handleShare(twit._id)}>
+                                        <i id={`share-icon-${twit._id}`} className={`fa fa-retweet ${twit.shares.indexOf( props.user._id ) > (-1) && 'text-success'}`}></i>
+                                        <span id={`share-value-${twit._id}`} >{twit.shares != '' ? twit.shares.length : 0}</span>
+                                    </p>
                                     <p><i className="fa fa-comment"></i> {twit.comments.length}</p>
                                 </div>
                             </div>

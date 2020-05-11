@@ -1,45 +1,114 @@
-import React, { useState } from 'react'
+import React, { useState, isValidElement } from 'react'
 import { API_SERVER_ROUTE } from '../../static-global-variables.json'
 import bg_imagen from '../../public/images/bg.jpg'
+import validator from 'validate.js'
 
 export default function Landing(props) {
+	const [name, setName] = useState()
 	const [slug, setSlug] = useState()
 	const [password, setPassword] = useState()
 	const [feedbackMsn, setFeedBk] = useState()
+	const [isAccount, setIsAccount] = useState(true)
 
 	const handleSubmit = async (e) => {
 		e.preventDefault()
-		const auth = await fetch(API_SERVER_ROUTE + '/api/user/auth', {
-			method: 'POST',
-			body: JSON.stringify({
-				slug,
-				password
-			}),
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			credentials: 'include'
-		})
-		const response = await auth.json()
-		if (response) {
-			await props.setUser(response)
-		}else {
-			// Usuario no encontrado
-			//console.log(feedbackMsn)
-			await (feedbackMsn.innerHTML = 'Usuario desconocido')
-			await feedbackMsn.classList.add("d-block");
-			await feedbackMsn.classList.add("text-danger");
+
+		if ( isAccount ){
+			if (!camposValidos ('login')) return;
+
+			const auth = await fetch(API_SERVER_ROUTE + '/api/user/auth', {
+				method: 'POST',
+				body: JSON.stringify({
+					slug,
+					password
+				}),
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				credentials: 'include'
+			})
+			const response = await auth.json()
+			if (response) {
+				await props.setUser(response)
+			}else {
+				// Usuario no encontrado
+				//console.log(feedbackMsn)
+				await (feedbackMsn.innerHTML = 'Usuario desconocido')
+				await feedbackMsn.classList.add("d-block");
+				await feedbackMsn.classList.add("text-danger");
+			}
+			console.log(response)
+		} else {
+			if (!camposValidos ('create_new_user')) return;
+
+			const auth = await fetch(API_SERVER_ROUTE + '/api/user', {
+				method: 'POST',
+				body: JSON.stringify({
+					name,
+					slug,
+					password
+				}),
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				credentials: 'include'
+			})
+			const response = await auth.json()
+			if (response) {
+				await props.setUser(response)
+			}else {
+				// Usuario no encontrado
+				//console.log(feedbackMsn)
+				await (feedbackMsn.innerHTML = 'Error en la creación del usuario, intenta más tarde')
+				await feedbackMsn.classList.add("d-block");
+				await feedbackMsn.classList.add("text-danger");
+			}
 		}
-		console.log(response)
 	}
 
-	const handleChange = e => {
+	/**
+	 * Validación de los campos del formulario de inicio para iniciar sesión o registrarse
+	 * @param {string} actionType tipo de acción que se realiza en el formulario: 'login' || 'create_new_user'
+	 */
+	const camposValidos = actionType => {
+		let isValidFields = true
+
+		if ( actionType == 'create_new_user'){
+			if ( !validator.isDefined(name) || !(/^[a-zA-Z0-9\_]*$/.test(name)) || (typeof name == 'string' && name.length < 2 ) ){
+				// nickname invalido
+				document.getElementById('name-input').classList.add('is-invalid')
+				isValidFields = false;
+			}
+		}
+
+		if ( !validator.isDefined(slug) || !(/^[a-zA-Z0-9\_]*$/.test(slug)) || (typeof slug == 'string' && slug.length < 2 ) ){
+			// nickname invalido
+			document.getElementById('slug-input').classList.add('is-invalid')
+			isValidFields = false;
+		}
+		
+		if ( !validator.isDefined(password) || (typeof password == 'string' && password.length < 2) ){
+			// password invalido
+			document.getElementById('password-input').classList.add('is-invalid')
+			isValidFields = false;
+		}
+		
+		return isValidFields
+	}
+
+	const handleChangeInputValue = e => {
 		switch (e.target.name) {
+			case 'name': setName(e.target.value); break;
 			case 'slug': setSlug(e.target.value); break;
 			case 'password': setPassword(e.target.value); break;
 		}
 		console.log(e.target.value)
+	}
+
+	const handleFormBehavior = ()=> {
+		setIsAccount( prevIA => !prevIA )
 	}
 
 	return (
@@ -57,13 +126,23 @@ export default function Landing(props) {
 					<div className="container">
 						<div className="user-action-form card">
 							<div className="card-body p-4">
-								<p className="h5 mb-3">Inicia</p>
+								<p className={`h5 mb-3 ${ !isAccount && 'd-none'}`}>Inicia</p>
+								<p className={`h5 mb-3 ${ isAccount && 'd-none'}`} >Crea tu usuario</p>
 								<form onSubmit={handleSubmit}>
-									<input className="form-control mb-3" type="text" placeholder="nickname" name="slug" onChange={handleChange} />
-									<input className="form-control mb-3" type="password" placeholder="contraseña" name="password" onChange={handleChange} />
+									<input id="name-input" className={`form-control mb-3 ${ isAccount && 'd-none'}`} type="text" placeholder="nombre" name="name" onChange={handleChangeInputValue} />
+
+									<input id="slug-input" className="form-control mb-3" type="text" placeholder="nickname" name="slug" onChange={handleChangeInputValue} />
+									
+									<input id="password-input" className="form-control mb-3" type="password" placeholder="contraseña" name="password" onChange={handleChangeInputValue} />
+									
 									<p className="feedback-message d-none" id="feedback-message" ref={ref => setFeedBk(ref)}></p>
-									<button className="btn btn-success btn-sm btn-block mb-3" type="submit">Entrar</button>
-									<p className="mb-0 text-center text-primary">No tengo cuenta</p>
+									
+									<button className={`btn btn-success btn-sm btn-block mb-3 ${ !isAccount && 'd-none'}`} type="submit">Entrar</button>
+									
+									<button className={`btn btn-info btn-sm btn-block mb-3 ${ isAccount && 'd-none'}`} type="submit">Registrarme</button>
+									
+									<p onClick={handleFormBehavior} className={`mb-0 text-center text-primary ${ !isAccount && 'd-none'}`}>No tengo cuenta</p>
+									<p onClick={handleFormBehavior} className={`mb-0 text-center text-primary ${ isAccount && 'd-none'}`}>Ya tengo una cuenta</p>
 								</form>
 							</div>
 						</div>

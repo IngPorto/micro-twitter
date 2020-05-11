@@ -15,6 +15,9 @@ let corsOptions = {
 }
 // Enabling CORS Pre-Flight. Necesario cuando el cliente envía datos y el servidor mantiene la sesión por cookies
 //router.options('/:skip/:limit', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/like/:id', cors(corsOptions))      // Asignar un like
+router.options('/share/:id', cors(corsOptions))     // Asignar un share
+router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/', cors(corsOptions))      // Creación de tarea
 // ---END-Configuración-CORS---
@@ -107,6 +110,64 @@ router.put('/:id', cors(corsOptions), async (req, res) =>{
         updTwit = await TwitModel.findByIdAndUpdate(req.params.id, req.body)
     } catch (e) {
         res.json({status: 'request fail', message: 'Fail updating the Twit: '+e})
+        return;
+    }
+    res.json (updTwit)
+})
+
+router.put('/like/:id', cors(corsOptions), async (req, res) =>{
+    let updTwit = {}
+    try {
+        const twit = await TwitModel.findById( req.params.id )
+        if ( twit.likes.indexOf( req.body.like ) > (-1) ){
+            // removing the like from the twit
+            updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+                $pull: {
+                    "likes": req.body.like
+                }
+            })
+            res.json (updTwit)
+            return;
+        }else {
+            // pushing the like to the twit
+            updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+                $push: {
+                    "likes": req.body.like
+                }
+            })
+            res.json (updTwit)
+        }
+    } catch (e) {
+        res.json({status: 'request fail', message: 'Fail commiting -Like- the Twit: '+e})
+        return;
+    }
+})
+
+router.put('/share/:id', cors(corsOptions), async (req, res) =>{
+    let updTwit = {}
+    try {
+        updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+            $push: {
+                "shares": req.body.share
+            }
+        })
+    } catch (e) {
+        res.json({status: 'request fail', message: 'Fail pushing new -Comment- to the Twit: '+e})
+        return;
+    }
+    res.json (updTwit)
+})
+
+router.put('/comment/:id', cors(corsOptions), async (req, res) =>{
+    let updTwit = {}
+    try {
+        updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+            $push: {
+                "comments": req.body.comment
+            }
+        })
+    } catch (e) {
+        res.json({status: 'request fail', message: 'Fail pushing new -Comment- to the Twit: '+e})
         return;
     }
     res.json (updTwit)
