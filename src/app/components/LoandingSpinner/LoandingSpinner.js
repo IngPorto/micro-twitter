@@ -5,7 +5,7 @@ export default function LoandingSpinner () {
 
     return (
         <div className="spiner">
-            <img src={spiner} alt="...Loading"/>
+            <img src={'/images/spin1.svg'} alt="...Loading"/>
 
             <style jsx>{`
                 .spiner {

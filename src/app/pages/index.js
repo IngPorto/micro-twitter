@@ -65,9 +65,6 @@ export default function Home() {
               <Wall user={user} setUser={setUser} />
             :
             <LoandingSpinner />
-        //<Link href="/twit"  ><a>Twit trailing</a></Link>
-        //<Link href="/user"><a>User</a></Link>
-        //<button onClick={test}>Twit</button>
         }
 
       </main>

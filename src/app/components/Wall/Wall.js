@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { API_SERVER_ROUTE } from '../../static-global-variables.json'
 import axios from 'axios'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import eslocale from 'date-fns/locale/es'
+import TwitCard from '../TwitCard/TwitCard'
 
 export default function Wall (props) {
     const [ twits, setTwits ] = useState([])
@@ -10,6 +12,7 @@ export default function Wall (props) {
     const [ deltaTwitsPerRequest, setDeltaTwitsPerRequest ] = useState(parseInt(0))
     const [ loading, setLoading ] = useState(false)
     const maxTwitsPerRequest = 10 // paginación inicial
+    const [ posicionPreviaDelScroll, setPosicionPreviaDelScroll ] = useState(0)
     // --
     const [ twitMessage, setTwitMessage ] = useState('')
 
@@ -71,6 +74,31 @@ export default function Wall (props) {
         })
         return () => cancel()
     },[deltaTwitsPerRequest])
+
+
+    const efectoOcultarHeaderAlScroll = () => {
+        if(window.scrollY > posicionPreviaDelScroll ){
+            // ocultar barra
+            setPosicionPreviaDelScroll( window.scrollY )
+            console.log("bajando")
+            document.getElementById("search").style.top = '-47px'
+            document.getElementById("search").style.transition = '0.5s'
+        }
+        else if( window.scrollY < posicionPreviaDelScroll ) {
+            // aparecer barra
+            setPosicionPreviaDelScroll( window.scrollY )
+            console.log("subiendo")
+            document.getElementById("search").style.top = '0'
+            document.getElementById("search").style.transition = '0.5s'
+        }
+    }
+
+    useEffect(() =>{
+        window.addEventListener('scroll', efectoOcultarHeaderAlScroll)
+        return () => {
+            window.removeEventListener('scroll', efectoOcultarHeaderAlScroll);
+        }
+    }, [posicionPreviaDelScroll])
 
     
     /**
@@ -140,51 +168,13 @@ export default function Wall (props) {
         })
     }
 
-    const handleLike = twitId => {
-        document.getElementById(`like-icon-${twitId}`).classList.toggle('text-danger')
-        if ( document.getElementById(`like-icon-${twitId}`).classList.contains('text-danger') ){
-            document.getElementById(`like-value-${twitId}`).innerText = parseInt(document.getElementById(`like-value-${twitId}`).innerText) + 1
-        }else {
-            document.getElementById(`like-value-${twitId}`).innerText = parseInt(document.getElementById(`like-value-${twitId}`).innerText) - 1
-        }
-        axios({
-            url: API_SERVER_ROUTE + `/api/twit/like/${twitId}`,
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({
-                like: props.user._id
-            })
-        })
-    }
-
-    const handleShare = twitId => {
-        document.getElementById(`share-icon-${twitId}`).classList.toggle('text-success')
-        if ( document.getElementById(`share-icon-${twitId}`).classList.contains('text-success') ){
-            document.getElementById(`share-value-${twitId}`).innerText = parseInt(document.getElementById(`share-value-${twitId}`).innerText) + 1
-        }else {
-            document.getElementById(`share-value-${twitId}`).innerText = parseInt(document.getElementById(`share-value-${twitId}`).innerText) - 1
-        }
-        axios({
-            url: API_SERVER_ROUTE + `/api/twit/share/${twitId}`,
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            data: JSON.stringify({
-                share: props.user._id
-            })
-        })
-    }
+    
 
     return (
         <div className="wall">
             { /* Searchbar component*/ }
-            <div className="search">
-                <form onSubmit={handleSubmit}>
+            <div className="search" id="search">
+                <form className="p-1" onSubmit={handleSubmit}>
 
                     <div className="input-group">
                         <input type="text" className="form-control search-input" placeholder="Buscar en MicroTwitter" aria-label="Recipient's username" aria-describedby="button-addon2" />
@@ -210,28 +200,7 @@ export default function Wall (props) {
                         twits.map( twit => {
                             /* Twitcard component */
                             return (
-                            <div className="twit" key={twit._id}>
-                                <div className="twit-head">
-                                    <img className="img-twit" src={handleGetOwnerTwitPhotoSrc} />
-                                    <div className="texto-pequeno">
-                                        <p><span >{twit.ownerDetails[0].name}</span> • <span className="text-muted">{  formatDistanceToNow(parseISO(twit.creation_time), { locale: eslocale})  }</span></p>
-                                        <p className="twit-message">{twit.message}</p>
-                                    </div>
-                                </div>
-                                <div className="twit-image">
-                                </div>
-                                <div className="twit-foot">
-                                    <p onClick={() => handleLike(twit._id)} >
-                                        <i id={`like-icon-${twit._id}`} className={`fa fa-heart ${twit.likes.indexOf( props.user._id ) > (-1) && 'text-danger'}`}></i> 
-                                        <span id={`like-value-${twit._id}`} >{twit.likes != '' ? twit.likes.length : 0}</span>
-                                    </p>
-                                    <p onClick={() => handleShare(twit._id)}>
-                                        <i id={`share-icon-${twit._id}`} className={`fa fa-retweet ${twit.shares.indexOf( props.user._id ) > (-1) && 'text-success'}`}></i>
-                                        <span id={`share-value-${twit._id}`} >{twit.shares != '' ? twit.shares.length : 0}</span>
-                                    </p>
-                                    <p><i className="fa fa-comment"></i> {twit.comments.length}</p>
-                                </div>
-                            </div>
+                                <TwitCard twit={twit} user={props.user} key={twit._id}/>
                             )
                         })
                 }
@@ -276,6 +245,7 @@ export default function Wall (props) {
             .search {
                 position: fixed;
                 width: 100%;
+                z-index: 100;
             }
             .search-input {
             }
@@ -284,21 +254,24 @@ export default function Wall (props) {
             }
             .footer{
                 position: fixed;
-                left: 0;
+                left: -2px;
                 bottom: -1px;
-                width: 100vw;
-                background-color: #1f1f1f;
+                width: 101vw;
+                background-color: rgba(31, 31, 31, 0.9);
                 padding: 6px;
+                backdrop-filter: blur(5px);
+                z-index: 100;
             }
             .micro-profile {
                 display: flex;
+                padding: 1px 5px;
             }
             .micro-profile img {
                 background-color: white;
                 width: 45px;
                 height: 45px;
                 border-radius: 23px;
-                margin-right: 6px;
+                margin-right: 10px;
             }
             .texto-pequeno {
                 font-size: 0.95rem;
@@ -317,6 +290,7 @@ export default function Wall (props) {
                 justify-content: center;
                 align-items: center;
                 border-radius: 30px;
+                z-index: 100;
             }
             .open-twit-layout-icon {
                 color: white;
@@ -329,6 +303,7 @@ export default function Wall (props) {
                 height: 100vh;
                 width: 100vw;
                 background-color: #1f1f1f;
+                z-index: 100;
             }
             .twit-form-layout-form {
                 width: 100%;
@@ -361,31 +336,7 @@ export default function Wall (props) {
                 padding-top: 56px;
                 padding-bottom: 53px;
             }
-            .twit {
-                padding: 0 15px;
-                border-bottom-style: solid;
-                border-bottom-color: #cecece;
-                border-bottom-width: 1px;
-                margin-bottom: 15px;
-            }
-            .twit-head {
-                display: flex;
-            }
-            .twit-message {
-                white-space: pre-line;
-            }
-            .twit-foot {
-                display: flex;
-                justify-content: space-around;
-            }
-            .img-twit {
-                background-color: #1f1f1f;
-                width: 45px;
-                min-width: 45px;
-                height: 45px;
-                border-radius: 23px;
-                margin-right: 6px;
-            }
+            
             `}</style>
         </div>
     )

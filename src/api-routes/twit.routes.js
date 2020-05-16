@@ -18,6 +18,7 @@ let corsOptions = {
 router.options('/like/:id', cors(corsOptions))      // Asignar un like
 router.options('/share/:id', cors(corsOptions))     // Asignar un share
 router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
+router.options('/comments', cors(corsOptions))   // Agregar un comentario
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/', cors(corsOptions))      // Creación de tarea
 // ---END-Configuración-CORS---
@@ -74,7 +75,24 @@ router.get('/:id', cors(corsOptions), async (req, res) =>{
         res.json({status: 'request fail', message: 'The id sended is not a ObjectId: '+e})
         return;
     }
-    const twits = await TwitModel.findById( ObjectId(req.params.id) )
+    //const twits = await TwitModel.findById( ObjectId(req.params.id) )
+    const twits = await TwitModel.aggregate([
+        {
+            $match: { "_id": ObjectId(req.params.id)}
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        }
+    ])
+    // Podría usar $unwind para volver todo el arreglo de comentarios objetos 
+    // y luego hacer un $lookup para traer esos datos de los comentarios y 
+    // mandarlos en la respuesta. Pero pueden llegar a ser muchos, así que haré
+    // otra consulta donde limitaré la cantidad de comentarios en pantalla
     res.json(twits)
 })
 
@@ -100,6 +118,33 @@ router.post('/', cors(corsOptions), async (req, res) =>{
         return;
     }
     res.json(newTwit)
+})
+
+router.post('/comments', cors(corsOptions), async (req, res) =>{
+    let { comments } = req.body
+    if ( comments.length < 1){
+        res.json({status: 'request fail', message: 'Comments array is empty'})
+        return 
+    }
+
+    comments = comments.map( commentsId => {
+        return ObjectId(commentsId)
+    })
+    
+    const twits = await TwitModel.aggregate([
+        {
+            $match: { "_id": {$in: comments } }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        }
+    ])
+    res.json(twits)
 })
 
 router.put('/:id', cors(corsOptions), async (req, res) =>{

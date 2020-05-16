@@ -10,7 +10,7 @@ const cors = require('cors')
 // --------------------------
 let corsOptions = {
     "origin": ["http://localhost:3000","http://localhost:3000/*"],
-    "allowedHeaders": "Content-Type,Authorization",
+    "allowedHeaders": "Content-Type, Authorization",
     "preflightContinue": true,
     "credentials": true,
 }
@@ -96,7 +96,7 @@ router.post('/', [
     const name = req.body.name
     const slug = req.body.slug
     const description = req.body.description
-    const photo = '/img/user_default.png'
+    const photo = '/img/user_default.svg'
     const password = req.body.password
     const creation_time = Date.now()
 

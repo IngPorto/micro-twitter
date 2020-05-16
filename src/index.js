@@ -7,6 +7,7 @@ const session = require('express-session')
 const cors = require('cors')
 const MongoStore = require('connect-mongo')(session)
 const mongoose2 = require('mongoose')
+//const cors = require('cors')
 
 // --------------------
 // ::: Configuración :::
