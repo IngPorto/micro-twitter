@@ -18,6 +18,7 @@ let corsOptions = {
 router.options('/auth', cors(corsOptions))  // Credenciales de autenticación de usuario
 router.options('/', cors(corsOptions))      // Creación de usuario
 router.options('/:id', cors(corsOptions))   // Actualización de datos de usuario y Eliminación
+router.options('/follow/:id', cors(corsOptions))   // Actualización de datos de usuario y Eliminación
 // ---END-Configuración-CORS---
 
 
@@ -115,6 +116,48 @@ router.post('/', [
         return;
     }
     res.json( newUser )
+})
+
+router.post('/follow/:id', cors(corsOptions), async (req, res)=>{
+    req.body.followerId // seguidor
+    req.params.id       // seguido
+    try {
+        const user = await UserModel.findById( req.body.followerId )
+        if ( user.following.indexOf( req.params.id ) > (-1) ){
+            // si ya lo estoy siguiendo, lo dejo de seguir
+            updUser_follower = await UserModel.findByIdAndUpdate( req.body.followerId, {
+                $pull: {
+                    "following": req.params.id
+                }
+            } )
+            updUser_followed = await UserModel.findByIdAndUpdate( req.params.id, {
+                $pull: {
+                    "followers": req.body.followerId
+                }
+            })
+            const updateUser = await UserModel.findById( req.params.id )
+            res.json( updateUser ) 
+            return;
+        }else{
+            // si no lo estoy siguiendo, lo sigo
+            updUser_follower = await UserModel.findByIdAndUpdate( req.body.followerId, {
+                $push: {
+                    "following": req.params.id
+                }
+            } )
+            updUser_followed = await UserModel.findByIdAndUpdate( req.params.id, {
+                $push: {
+                    "followers": req.body.followerId
+                }
+            })
+            const updateUser = await UserModel.findById( req.params.id )
+            res.json( updateUser ) 
+        }
+
+    } catch (e){
+        res.json( {status: 'request failed', message: 'fallo en la -actualización- del usuario: '+e} )
+        return;
+    }
 })
 
 router.put('/:id', cors(corsOptions), async (req, res) => {

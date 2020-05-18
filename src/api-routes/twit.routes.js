@@ -3,6 +3,9 @@ const router = express.Router()
 const TwitModel = require('../models/twit')
 const ObjectId = require('mongoose').Types.ObjectId
 const cors = require('cors')
+const multer = require('multer')
+const path = require('path')
+const { v4: uuidv4 } = require('uuid')
 
 // --------------------------
 // ::: Configuración CORS ::: 
@@ -96,18 +99,38 @@ router.get('/:id', cors(corsOptions), async (req, res) =>{
     res.json(twits)
 })
 
-router.post('/', cors(corsOptions), async (req, res) =>{
+// Configuraciones de carga globales a todas las rutas
+const storage = multer.diskStorage({
+    destination: path.join( __dirname ,'../app/public/uploads'),
+    filename:(req, file, callback) => {
+        callback( null, uuidv4() + path.extname( file.originalname) ) // ningún error, nuevo nombre del archivo
+    }
+})
+// Configuraciones de carga locales a la ruta
+const uploadConfig = multer({
+    storage,
+    dest: path.join( __dirname ,'../app/public/uploads'),
+    limits: {fileSize: 3000000} // peso máximo 3 Mb
+})
+
+// single lleva el nombre del tag
+router.post('/', cors(corsOptions), uploadConfig.single('image') , async (req, res) =>{
     const {
         message,
         owner,
-        image = null,
         parent = null
     } = req.body
     
+    // visualizando el archivo entrante
+    console.log('---:: visualizando el archivo entrante ::---')
+    console.log(req.file)
+    console.log('---:: nombre del archivo entrante ::---')
+    console.log(req.file.filename)
+
     const newTwit = new TwitModel({
         message,
         owner,
-        image,
+        image: req.file.filename || null,
         parent,
         creation_time: Date.now(),
     })
@@ -120,6 +143,9 @@ router.post('/', cors(corsOptions), async (req, res) =>{
     res.json(newTwit)
 })
 
+/**
+ * Servicios que recibe un arreglo de twit_id y los transforma en un arreglo de objetos de twits
+ */
 router.post('/comments', cors(corsOptions), async (req, res) =>{
     let { comments } = req.body
     if ( comments.length < 1){
@@ -191,11 +217,23 @@ router.put('/like/:id', cors(corsOptions), async (req, res) =>{
 router.put('/share/:id', cors(corsOptions), async (req, res) =>{
     let updTwit = {}
     try {
-        updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
-            $push: {
-                "shares": req.body.share
-            }
-        })
+        const twit = await TwitModel.findById( req.params.id )
+        if ( twit.shares.indexOf( req.body.share ) > (-1) ){
+            // removing the share from the twit
+            updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+                $pull: {
+                    "shares": req.body.share
+                }
+            })
+            res.json (updTwit)
+            return;
+        }else {
+            updTwit = await TwitModel.findByIdAndUpdate(req.params.id, {
+                $push: {
+                    "shares": req.body.share
+                }
+            })
+        }
     } catch (e) {
         res.json({status: 'request fail', message: 'Fail pushing new -Comment- to the Twit: '+e})
         return;

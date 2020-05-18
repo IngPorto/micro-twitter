@@ -55,14 +55,18 @@ export default function TwitCard (props) {
             </Link>
             <div className="twit-head">
                 <Link href="/user/[user_id]" as={`/user/${props.twit.ownerDetails[0]._id}`}>
-                    <img className="img-twit" src={props.twit.ownerDetails[0].photo} />
+                    <img className="img-twit-owner" src={props.twit.ownerDetails[0].photo} />
                 </Link>
                 <div className="texto-pequeno">
                     <p><span className="font-weight-bold" >{props.twit.ownerDetails[0].name}</span> • <span className="text-muted">{  formatDistanceToNow(parseISO(props.twit.creation_time), { locale: eslocale})  }</span></p>
                     <p className="twit-message">{props.twit.message}</p>
                 </div>
             </div>
-            <div className="twit-image">
+            <div className="twit-image-container">
+                {
+                    props.twit.image &&
+                        <img className="twit-image" src={`/uploads/${props.twit.image}`} />
+                }
             </div>
             <div className="twit-foot">
                 <p onClick={() => handleLike(props.twit._id)} className="like-btn text-muted">
@@ -101,7 +105,7 @@ export default function TwitCard (props) {
                 display: flex;
                 justify-content: space-around;
             }
-            .img-twit {
+            .img-twit-owner {
                 background-color: transparent;
                 width: 45px;
                 min-width: 45px;
@@ -109,6 +113,13 @@ export default function TwitCard (props) {
                 border-radius: 23px;
                 margin-right: 6px;
                 z-index: 10;
+            }
+            .twit-image {
+                border-radius: 19px;
+                margin-bottom: 5px;
+                max-height: 276px;
+                width: 100%;
+                object-fit: cover;
             }
             .like-btn {
                 z-index: 10;
