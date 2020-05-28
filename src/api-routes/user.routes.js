@@ -9,7 +9,7 @@ const cors = require('cors')
 // ::: Configuración CORS ::: 
 // --------------------------
 let corsOptions = {
-    "origin": ["http://localhost:3000","http://localhost:3000/*"],
+    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*"],
     "allowedHeaders": "Content-Type, Authorization",
     "preflightContinue": true,
     "credentials": true,
@@ -43,7 +43,9 @@ router.post('/auth', cors(corsOptions), async (req, res)=>{
 router.get('/session', cors(corsOptions), async (req, res)=>{
     showRequestData(req)
     if ( req.session.user ){
-        res.json(req.session.user)
+        const user = await UserModel.findById(req.session.user._id)
+        req.session.user = user
+        res.json(user)
     }else {
         res.json(null)
     }

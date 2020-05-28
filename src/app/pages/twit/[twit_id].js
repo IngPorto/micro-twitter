@@ -8,6 +8,7 @@ import { format, parseISO } from 'date-fns'
 import eslocale from 'date-fns/locale/es'
 import LoandingSpinner from '../../components/LoandingSpinner/LoandingSpinner'
 import TwitCard from '../../components/TwitCard/TwitCard'
+import TwitForm from '../../components/TwitForm/TwitForm'
 
  const Twit = () => {
     const router = useRouter()
@@ -156,6 +157,17 @@ import TwitCard from '../../components/TwitCard/TwitCard'
         }
     }, [followState])
 
+    const handleReply = e => {
+        e.preventDefault()
+    }
+
+    /**
+     * Visualiza el modal para crear un nuevo twit que tiene como padre el twit visualizado
+     * @param {event} e Evento ejecutado en el click
+     */
+    const handleOpenTwitForm = e => {
+        document.getElementById('twit-form-layout').classList.remove('d-none')
+    }
 
     return (
         <div>
@@ -211,6 +223,7 @@ import TwitCard from '../../components/TwitCard/TwitCard'
                                 <p onClick={() => handleShare(twit._id)} className="share-btn text-muted mb-1">
                                     <i id={`share-icon-${twit._id}`} className={`fa fa-retweet mr-2 ${twit.shares.indexOf( user._id ) > (-1) && 'text-success'}`}></i>
                                 </p>
+                                <p onClick={handleOpenTwitForm} className="comment-btn" ><i className="fa fa-comment text-muted mr-2"></i></p>
                             </div>
                     }
                     {
@@ -229,6 +242,10 @@ import TwitCard from '../../components/TwitCard/TwitCard'
                             format ( parseISO(twit.creation_time), 'h:mm aaaa • d LLL. yy', {locale: eslocale}).toString()
                         }</p>
                     </div>
+
+                    { /* Reply Modal */ }
+                    <TwitForm user={user} parent={twitID}/>
+
                     {
                         comments &&
                         <div className="twit-comments pt-3">

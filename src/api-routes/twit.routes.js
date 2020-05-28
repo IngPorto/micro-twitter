@@ -11,7 +11,7 @@ const { v4: uuidv4 } = require('uuid')
 // ::: Configuración CORS ::: 
 // --------------------------
 let corsOptions = {
-    "origin": ["http://localhost:3000","http://localhost:3000/*"],
+    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*"],
     "allowedHeaders": "Content-Type,Authorization",
     "preflightContinue": true,
     "credentials": true,
@@ -22,11 +22,41 @@ router.options('/like/:id', cors(corsOptions))      // Asignar un like
 router.options('/share/:id', cors(corsOptions))     // Asignar un share
 router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
 router.options('/comments', cors(corsOptions))   // Agregar un comentario
+router.options('/user/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/', cors(corsOptions))      // Creación de tarea
 // ---END-Configuración-CORS---
 
 
+
+
+// get user twits by user id
+router.get('/user/:id', cors(corsOptions), async (req, res) =>{
+    try{
+        ObjectId(req.params.id)
+    } catch (e){
+        res.json({status: 'request fail', message: 'The id sended is not a ObjectId: '+e})
+        return;
+    }
+    //const twits = await TwitModel.findById( ObjectId(req.params.id) )
+    const twits = await TwitModel.aggregate([
+        {
+            $match: {owner : ObjectId(req.params.id)}
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'ownerDetails'
+            }
+        },
+        {
+            $sort: {creation_time: -1}
+        }
+    ]) 
+    res.json(twits)
+})
 
 // -- Custom Twit request
 router.get('/:skip/:limit', cors(corsOptions), async (req, res) =>{
@@ -71,6 +101,7 @@ router.get('/', cors(corsOptions), async (req, res) =>{
     res.json(twits)
 })
 
+// get twit by id
 router.get('/:id', cors(corsOptions), async (req, res) =>{
     try{
         ObjectId(req.params.id)
@@ -99,6 +130,7 @@ router.get('/:id', cors(corsOptions), async (req, res) =>{
     res.json(twits)
 })
 
+
 // Configuraciones de carga globales a todas las rutas
 const storage = multer.diskStorage({
     destination: path.join( __dirname ,'../app/public/uploads'),
@@ -122,20 +154,27 @@ router.post('/', cors(corsOptions), uploadConfig.single('image') , async (req, r
     } = req.body
     
     // visualizando el archivo entrante
-    console.log('---:: visualizando el archivo entrante ::---')
-    console.log(req.file)
-    console.log('---:: nombre del archivo entrante ::---')
-    console.log(req.file.filename)
+    if ( req.file ){
+        console.log('---:: visualizando el archivo entrante ::---')
+        console.log(req.file)
+        console.log('---:: nombre del archivo entrante ::---')
+        console.log(req.file.filename)
+    }else {
+        console.log('---:: NO HAY ARCHIVO ADJUNTO ::---')
+    }
 
     const newTwit = new TwitModel({
         message,
         owner,
-        image: req.file.filename || null,
+        image: req.file ? req.file.filename : null,
         parent,
         creation_time: Date.now(),
     })
     try {
         await newTwit.save()
+        if( parent ){
+            await TwitModel.findByIdAndUpdate( ObjectId(parent), { $push: { comments: newTwit._id }})
+        }
     } catch (e) {
         res.json({status: 'request fail', message: 'Fail creating a new Twit: '+e})
         return;
