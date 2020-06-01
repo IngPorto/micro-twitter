@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[8],{"+X1z":function(n,w,o){(window.__NEXT_P=window.__NEXT_P||[]).push(["/twit",function(){return o("ENV+")}])},"ENV+":function(n,w){}},[["+X1z",0]]]);
