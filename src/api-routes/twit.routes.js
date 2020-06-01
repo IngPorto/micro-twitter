@@ -11,7 +11,7 @@ const { v4: uuidv4 } = require('uuid')
 // ::: Configuración CORS ::: 
 // --------------------------
 let corsOptions = {
-    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*", "https://micro-twitter.now.sh", "https://micro-twitter.now.sh/*", "https://micro-twitter-8ptwxsb3a.now.sh" , "https://micro-twitter-8ptwxsb3a.now.sh/*"],
+    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*", "https://micro-twitter.now.sh", "https://micro-twitter.now.sh/*", "https://micro-twitter-i4h8lbi5k.now.sh" , "https://micro-twitter-i4h8lbi5k.now.sh/*"],
     "allowedHeaders": "Content-Type,Authorization",
     "preflightContinue": true,
     "credentials": true,
