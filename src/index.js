@@ -25,7 +25,7 @@ server.set('trust proxy', 1)
 //server.use(cors())
 
 // Conexión de mongo solo para adminstrar las sesiones
-const connection = mongoose2.createConnection('mongodb+srv://application:<password>@cluster0-hllop.mongodb.net/micro-twitter?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+const connection = mongoose2.createConnection('mongodb+srv://application:Appl1c4t10n@cluster0-hllop.mongodb.net/micro-twitter?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
 const sessionStorage = new MongoStore({
     mongooseConnection: connection,
     collection: 'sessions'
