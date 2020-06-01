@@ -47,7 +47,7 @@ server.use(session({
 server.use('/api/twit', require('./api-routes/twit.routes') )
 server.use('/api/user', require('./api-routes/user.routes') )
 server.get('/',function(req,res) {
-    res.sendFile('./app/build/index.html');
+    res.sendFile( path.join(__dirname,'app/build/index.html'));
 });
 
 // --------------------
