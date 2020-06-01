@@ -1,6 +1,6 @@
 import react from 'react'
 import Link from 'next/link'
-import { API_SERVER_ROUTE } from '../../static-global-variables.json'
+import { API_SERVER_ROUTE, IMAGES_SERVER_ROUTE } from '../../static-global-variables.json'
 import axios from 'axios'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import eslocale from 'date-fns/locale/es'
@@ -65,7 +65,7 @@ export default function TwitCard (props) {
             <div className="twit-image-container">
                 {
                     props.twit.image &&
-                        <img className="twit-image" src={`/uploads/${props.twit.image}`} />
+                        <img className="twit-image" src={`${IMAGES_SERVER_ROUTE}/uploads/${props.twit.image}`} />
                 }
             </div>
             <div className="twit-foot">
