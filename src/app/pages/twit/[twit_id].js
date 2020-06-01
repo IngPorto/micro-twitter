@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { API_SERVER_ROUTE } from '../../static-global-variables.json'
+import { API_SERVER_ROUTE, IMAGES_SERVER_ROUTE } from '../../static-global-variables.json'
 import axios from 'axios'
 import { format, parseISO } from 'date-fns'
 import eslocale from 'date-fns/locale/es'
@@ -211,7 +211,7 @@ import TwitForm from '../../components/TwitForm/TwitForm'
                     {
                         twit.image &&
                             <div className="twit-image-container">
-                                <img className="twit-image" src={`/uploads/${twit.image}`}/>
+                                <img className="twit-image" src={`${IMAGES_SERVER_ROUTE}/uploads/${twit.image}`}/>
                             </div>
                     }
                     {

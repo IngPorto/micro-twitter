@@ -9,7 +9,7 @@ const cors = require('cors')
 // ::: Configuración CORS ::: 
 // --------------------------
 let corsOptions = {
-    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*", "https://micro-twitter-i4h8lbi5k.now.sh" , "https://micro-twitter-i4h8lbi5k.now.sh/*"],
+    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*", "https://micro-twitter-gztcpg5sq.now.sh" , "https://micro-twitter-gztcpg5sq.now.sh/*"],
     "allowedHeaders": "Content-Type, Authorization",
     "preflightContinue": true,
     "credentials": true,
