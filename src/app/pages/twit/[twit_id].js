@@ -211,7 +211,7 @@ import TwitForm from '../../components/TwitForm/TwitForm'
                     {
                         twit.image &&
                             <div className="twit-image-container">
-                                <img className="twit-image" src={`${IMAGES_SERVER_ROUTE}/uploads/${twit.image}`}/>
+                                <img className="twit-image" src={`${twit.image}`}/>
                             </div>
                     }
                     {

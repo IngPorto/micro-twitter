@@ -65,7 +65,7 @@ export default function TwitCard (props) {
             <div className="twit-image-container">
                 {
                     props.twit.image &&
-                        <img className="twit-image" src={`${IMAGES_SERVER_ROUTE}/uploads/${props.twit.image}`} />
+                        <img className="twit-image" src={`${props.twit.image}`} />
                 }
             </div>
             <div className="twit-foot">
