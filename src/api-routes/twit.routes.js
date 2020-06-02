@@ -24,6 +24,7 @@ router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
 router.options('/comments', cors(corsOptions))   // Agregar un comentario
 router.options('/user/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/test', cors(corsOptions))      // Creación de tarea
 router.options('/', cors(corsOptions))      // Creación de tarea
 // ---END-Configuración-CORS---
 
@@ -131,6 +132,17 @@ router.get('/:id', cors(corsOptions), async (req, res) =>{
 })
 
 
+// CLOUDINARY
+
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+    cloud_name: 'lanubevoladora',
+    api_key: '599336553174427',
+    api_secret: 'rAI6QiuEtOX8rePQ9GAmS6SmXuc'
+})
+
+
+
 // Configuraciones de carga globales a todas las rutas
 const storage = multer.diskStorage({
     destination: path.join( __dirname ,'../app/public/uploads'),
@@ -152,6 +164,8 @@ router.post('/', cors(corsOptions), uploadConfig.single('image') , async (req, r
         owner,
         parent = null
     } = req.body
+
+    let image = null;
     
     // visualizando el archivo entrante
     if ( req.file ){
@@ -163,10 +177,16 @@ router.post('/', cors(corsOptions), uploadConfig.single('image') , async (req, r
         console.log('---:: NO HAY ARCHIVO ADJUNTO ::---')
     }
 
+    await cloudinary.uploader.upload(req.file.path, {resource_type: 'image', folder: "micro-twitter"}, (err, result) => { 
+        console.log("Carga Completa a CLOUDINARY") 
+        console.log(result) 
+        image= result.secure_url
+    });
+
     const newTwit = new TwitModel({
         message,
         owner,
-        image: req.file ? req.file.filename : null,
+        image,
         parent,
         creation_time: Date.now(),
     })
