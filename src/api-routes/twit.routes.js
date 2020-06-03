@@ -31,11 +31,11 @@ let corsOptions = {
 }
 // Enabling CORS Pre-Flight. Necesario cuando el cliente envía datos y el servidor mantiene la sesión por cookies
 //router.options('/:skip/:limit', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/noImageTwit', cors(corsOptions))      // Creación de twit sin imagen, solo texto
 router.options('/like/:id', cors(corsOptions))      // Asignar un like
 router.options('/share/:id', cors(corsOptions))     // Asignar un share
 router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
 router.options('/comments', cors(corsOptions))   // Agregar un comentario
-router.options('/noImageTwit', cors(corsOptions))      // Creación de twit sin imagen, solo texto
 router.options('/user/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/test', cors(corsOptions))      // Creación de tarea
@@ -155,7 +155,7 @@ router.post('/noImageTwit', cors(corsOptions), async (req, res) =>{
     const newTwit = new TwitModel({
         message,
         owner,
-        image=null,
+        image:null,
         parent,
         creation_time: Date.now(),
     })
