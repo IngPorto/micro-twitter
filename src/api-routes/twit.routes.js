@@ -11,7 +11,20 @@ const { v4: uuidv4 } = require('uuid')
 // ::: Configuración CORS ::: 
 // --------------------------
 let corsOptions = {
-    "origin": ["http://localhost:3000","http://localhost:3000/*","http://192.168.0.3:3000","http://192.168.0.3:3000/*","http://192.168.0.14:3000","http://192.168.0.14:3000/*", "https://micro-twitter.now.sh", "https://micro-twitter.now.sh/*", "https://micro-twitter-gztcpg5sq.now.sh" , "https://micro-twitter-gztcpg5sq.now.sh/*"],
+    "origin": [
+        "http://localhost:3000",
+        "http://localhost:3000/*",
+        "http://192.168.0.3:3000",
+        "http://192.168.0.3:3000/*",
+        "http://192.168.0.14:3000",
+        "http://192.168.0.14:3000/*", 
+        "https://micro-twitter.now.sh", 
+        "https://micro-twitter.now.sh/*", 
+        "https://micro-twitter-7gs78f4y7.now.sh", 
+        "https://micro-twitter-7gs78f4y7.now.sh/*",
+        "https://micro-twitter-frontwnd.herokuapp.com",
+        "https://micro-twitter-frontwnd.herokuapp.com/*"
+    ],
     "allowedHeaders": "Content-Type,Authorization",
     "preflightContinue": true,
     "credentials": true,
@@ -145,7 +158,7 @@ cloudinary.config({
 
 // Configuraciones de carga globales a todas las rutas
 const storage = multer.diskStorage({
-    destination: path.join( __dirname ,'../app/public/uploads'),
+    destination: path.join( __dirname ,'../uploads'),
     filename:(req, file, callback) => {
         callback( null, uuidv4() + path.extname( file.originalname) ) // ningún error, nuevo nombre del archivo
     }
@@ -153,7 +166,7 @@ const storage = multer.diskStorage({
 // Configuraciones de carga locales a la ruta
 const uploadConfig = multer({
     storage,
-    dest: path.join( __dirname ,'../app/public/uploads'),
+    dest: path.join( __dirname ,'../uploads'),
     limits: {fileSize: 3000000} // peso máximo 3 Mb
 })
 
