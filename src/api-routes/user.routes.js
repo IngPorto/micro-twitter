@@ -18,8 +18,8 @@ let corsOptions = {
         "http://192.168.0.14:3000/*", 
         "https://micro-twitter-7gs78f4y7.now.sh", 
         "https://micro-twitter-7gs78f4y7.now.sh/*",
-        "https://micro-twitter-frontwnd.herokuapp.com",
-        "https://micro-twitter-frontwnd.herokuapp.com/*"
+        "https://clontw.herokuapp.com",
+        "https://clontw.herokuapp.com/*"
     ],
     "allowedHeaders": "Content-Type, Authorization",
     "preflightContinue": true,
