@@ -37,6 +37,7 @@ router.options('/comment/:id', cors(corsOptions))   // Agregar un comentario
 router.options('/comments', cors(corsOptions))   // Agregar un comentario
 router.options('/user/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
 router.options('/:id', cors(corsOptions))   // Actualización de datos de tarea y Eliminación
+router.options('/noImageTwit', cors(corsOptions))      // Creación de twit sin imagen, solo texto
 router.options('/test', cors(corsOptions))      // Creación de tarea
 router.options('/', cors(corsOptions))      // Creación de tarea
 // ---END-Configuración-CORS---
