@@ -145,6 +145,33 @@ router.get('/:id', cors(corsOptions), async (req, res) =>{
 })
 
 
+router.post('/noImageTwit', cors(corsOptions), async (req, res) =>{
+    const {
+        message,
+        owner,
+        parent = null
+    } = req.body
+    const newTwit = new TwitModel({
+        message,
+        owner,
+        image=null,
+        parent,
+        creation_time: Date.now(),
+    })
+    try {
+        await newTwit.save()
+        if( parent ){
+            await TwitModel.findByIdAndUpdate( ObjectId(parent), { $push: { comments: newTwit._id }})
+        }
+    } catch (e) {
+        res.json({status: 'request fail', message: 'Fail creating a new Twit: '+e})
+        return;
+    }
+    res.json(newTwit)
+})
+
+
+
 // CLOUDINARY
 
 const cloudinary = require('cloudinary').v2
